@@ -13,7 +13,8 @@ def index():
         ##'<br><a href="'+'/home.html'+'">home</a>' +\
         ##'<br><a href="'+url_for('admin')+'">Admin</a>'
         ##return '<br><a href="'+'/home.html'+'">home</a>' 
-        return app.send_static_file('home.html')
+          return app.send_static_file('home.html')
+
     
 @app.route('/admin',methods=['GET'])
 def adminOnly():
@@ -28,8 +29,10 @@ def products():
     return 'products'
 
 @app.route('/shop', methods =['GET'])
-def shop():
-    return 'shop'
+def product_list():
+    products = get_products()
+    return render_template('shop.html', products=products)
+    
 
         
 
@@ -40,26 +43,23 @@ def order():
     elif not 'username' in session:
         return redirect(url_for('login'))
     
+@app.route('/contact')
+def contact():
+    return render_template(contact.html)
+
+    
 @app.route('/history')
 def history():
-    if 'order' in order:
+    if 'username' in session:
         return '<br><a href="'+'/order.html'+'">order</a>' 
-    elif not 'order' in order:
-        return redirect(url_for('order'))
+    else:
+        return redirect(url_for('login'))
     
-   
-
-@app.route('/process-payment', methods=['POST'])
-def process_payment():
-      payment_method_id = request.form.get('paymentMethodId')
-      
-
 @app.route('/logout')
 def logout():
     session.clear()
     return "you have not logged out"
-    return redirect('/home.html')
-
+    return redirect('/home.html')  
 
 @app.route('/clear')
 def clear():
@@ -67,7 +67,12 @@ def clear():
     session.pop('counter',None)   
 
     return "done" 
+   
 
+@app.route('/process-payment', methods=['POST'])
+def process_payment():
+      payment_method_id = request.form.get('paymentMethodId')
+      
 
 
 
