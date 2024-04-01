@@ -22,19 +22,20 @@ def adminOnly():
         return render_template("/admin.html")
     elif not 'username' in session:
         return redirect(url_for('login'))
+    
+@app.route('/shop', methods =['GET'])
+def product_list():
+    products = get_products()
+    return render_template('shop.html', products=products)
+
 
     
 @app.route('/products', methods =['GET'])
 def products():
     return 'products'
 
-@app.route('/shop', methods =['GET'])
-def product_list():
-    products = get_products()
-    return render_template('shop.html', products=products)
     
 
-        
 
 @app.route('/order')
 def order():
@@ -82,6 +83,9 @@ def failure():
     return redirect('/order.html')
 
 
+@app.route('/shop/<int:id>', methods=['PUT'])
+def update(id):
+     mycursor, connection = DataDAO.get_cursor()
 
 
 if __name__ == '__main__':
