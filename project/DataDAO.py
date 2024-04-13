@@ -73,7 +73,7 @@ def delete(self, id):
     
 def convertToDictionary(self, result):
         # Helper function to convert database row to a dictionary
-        colnames = ['username'] ['email'] ['password'] ['phone'] ['eircode']
+        colnames = ['username'],['email'],['password'],['phone'],['eircode']
         user = {colname: result[idx] for idx, colname in enumerate(colnames)}
         return user
 
