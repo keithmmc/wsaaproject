@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Search Open</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+       <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script> -->
+       <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+       
+       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+    </head>
+
+    <body>
+        <div class="container">
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <div class="container-fluid">
+                    
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation"></button>
+                    <span class="nav-bar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                      <li class="nav-item">
+                        <a class="nav-link" href="home.html">home</a>
+                      </li>
+                      
+                      <li class="nav-item">
+                        <a class="nav-link" href="shop.html">shop</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="orders.html">orders</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="contact.html">contact</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="history.html">history</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="search.html">Search</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="searchproducts.html">External Search</a>
+                      </li>
+                    
+                    </ul>
+               
+                  <li class="nav-item">
+                    <a class="nav-link" href="/admin">Login</a>
+                  </li>
+
+                </ul>
+                 
+
+              </div>
+            </div>
+          </nav>
+        </div>
+
+  <div class="container">
+
+    <div id='findResourcesForm' style="display: block">
+      
+      <input type="hidden" name="id"/>
+
+      <p>
+      <input type="text" name="dataset_name" placeholder="rain"/>
+      <span><button id="getDatasetResourcessByQueryButton" onclick="queryDatasetResources()"> Find Product by resource </button></span></br>
+    </p>
+    
+      <p>
+      <input type="text" name="Id" />
+      <button id="findByIdButton" onclick="findById()">Find Product by Id</button>
+    </p>
+  </div>
+  </div>
+
+
+
+  <div id="search-resources">
+
+    <div class="table-responsive">
+        <table id="resourcesTable" class="table table-sm table-striped table-condensed vertical-align: left;">
+            <thead class="thead-dark">
+            <tr>
+                <th scope="col">Name</th><th style="width:1px; white-space:wrap;">Description</th><th scope="col">Id</th><th scope="col">Format</th><th scope="col">URL</th><th scope="col">Delete</th><th scope="col">Created</th><th scope="col">package_id</th>
+            </tr>
+            </thead>
+            
+        </table>
+    </div>     
+       
+
+</div>     
+</div>  
+              
+<script>
+
+  function getQueryFromForm(){
+    var form = document.getElementById('findResourcesForm')
+    var dataset = {}
+    dataset.id = form.querySelector('input[name="id"]').value
+    //dataset.package_id = form.querySelector('input[name="package_id"]').value
+    dataset.name = form.querySelector('input[name="dataset_name"]').value 
+  
+    dataset.Id = form.querySelector('input[name="Id"]').value
+ 
+    return dataset
+    }
+
+    //+ "%" + encodeURI(query)
+
+    function queryDatasetResources(){
+        // here I am calling the ajax query but also trying to clear the form and the table
+        query = getQueryFromForm().name
+        console.log(query)
+        
+        var tableElement = document.getElementById('resourcesTable')
+        queryResourcesAjax(query)
+        
+    }
+
+  // I set up a new route as it wont allow me search by query using same route as search by id
+    // perhaps because id is also a string query
+    function queryResourcesAjax(query){
+            host = window.location.origin
+            //query = getQueryFromForm().package_name
+            $.ajax({
+                
+                "url": host+"/queryresources/" +  encodeURI(query) + "%",
+                "method":"GET",
+                "data":"",
+                "dataType": "JSON",
+                
+                "success":function(result){
+
+                   
+                      for (resource of result){
+                        addResourceToTable(resource)
+                    } 
+  
+                    
+                },
+                "error":function(xhr,status,error){
+                    console.log("error: "+status+" msg:"+error);
+                }
+            });
+
+        }
+
+
+
+
+    //<th>Url</th><th>Format</th><th>name</th><th>description</th><th>Created</th><th>id</th><th>package_id</th>
+    function addResourceToTable(resource){
+        var tableElement = document.getElementById('resourcesTable')
+        tableElement.style.display="block"
+        var rowElement = tableElement.insertRow(-1)
+        rowElement.setAttribute('id',resource.id)
+
+        var cell1 = rowElement.insertCell(0);
+        cell1.innerHTML = resource.name.small()
+
+        var cell2 = rowElement.insertCell(1);
+        cell2.innerHTML = resource.description.small();
+  
+        var cell3 = rowElement.insertCell(2);
+        cell3.innerHTML = resource.id.small();
+
+        var cell4 = rowElement.insertCell(3);
+        cell4.innerHTML = resource.format.small()
+        
+        
+        var cell5 = rowElement.insertCell(4);
+        // make the url into a clickable link
+        var url = resource.url  
+        var result = url.link(url)
+        cell5.innerHTML = result;
+
+        var cell6 = rowElement.insertCell(5);
+        cell6.innerHTML='<button onclick=doDelete(this) class="btn btn-danger">delete</button>'
+        
+        var cell7 = rowElement.insertCell(6);
+        cell7.innerHTML = resource.created.small();
+
+        var cell8 = rowElement.insertCell(7 );
+        cell8.innerHTML = resource.package_id.small()
+
+        }
+
+
+
+
+
+    function clearForm(){
+        var form = document.getElementById('findDatasetForm')
+        form.querySelector('input[name="id"]').value=''
+        form.querySelector('input[name="package_id"]').value=''
+        form.querySelector('input[name="package_name"]').value=''
+        document.getElementById('packageTable').style.display="none"
+    }   
+
+    function doDelete(r){
+    var tableElement = document.getElementById('resourcesTable');
+    var rowElement = r.parentNode.parentNode;
+    var index = rowElement.rowIndex;
+    deleteResourceAjax(rowElement.getAttribute("Id"));
+    tableElement.deleteRow(index);
+  }      
+  // DELETE IS WORKING
+  function deleteResourceAjax(Id){
+    host = window.location.origin
+    $.ajax({
+                
+                 "url": host+"/deleteresources/" + encodeURI(Id),
+                "method":"DELETE",
+                "data":"",
+                "dataType": "JSON",
+                contentType: "application/json; charset=utf-8",
+                "success":function(result){
+                  console.log(result)
+                },
+                "error":function(xhr,status,error){
+                  console.log("error: "+status+" msg: "+error);
+                }
+
+            });
+          }
+
+    function findById(){
+        // here I am calling the ajax query but also trying to clear the form and the table
+    Id = getQueryFromForm().Id
+    console.log(Id)
+        
+    var tableElement = document.getElementById('resourcesTable')
+    findByIdAjax(Id)
+        
+    }
+
+    // find by id working 
+    function findByIdAjax(Id){
+        host = window.location.origin
+            
+        $.ajax({
+           
+            "url": host+"/resources/" + encodeURI(Id),
+            "method":"GET",
+            "data":"",
+            "dataType": "JSON",
+                
+            "success":function(result){
+
+                    // will only return a single result
+                      console.log(result)
+                      addResourceToTable(result)
+
+                    
+                },
+            "error":function(xhr,status,error){
+                    console.log("error: "+status+" msg:"+error);
+                }
+            });
+
+        }
+
+
+    function hideTable(){
+    document.getElementById('resourcesTable').style.display="none"}
+hideTable()
+</script>   
+
+</body>
+</html>
