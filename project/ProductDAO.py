@@ -12,7 +12,8 @@ class ProductDAO:
         db = mysql.connecter.connect(
         host = cfg.mysql['host'],
         user = cfg.mysql['user'],
-        password = cfg.mysql['pass']
+        password = cfg.mysql['pass'], 
+        database=cfg.mysql['flaskdb']
      )
         return db 
    
