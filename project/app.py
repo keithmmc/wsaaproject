@@ -7,7 +7,7 @@ app = Flask(__name__, static_url_path='', static_folder='static')
 import stripe 
 from DataDAO import DataDAO
 from ProductDAO import ProductDAO
-from OrderDAO import OrderDAO
+from BandDAO import BandDAO
 
 
 
@@ -31,7 +31,7 @@ def adminOnly():
     elif not 'username' in session:
         return redirect(url_for('login'))
     
-@app.route('/user/', methods=['GET'])
+@app.route('/customer/', methods=['GET'])
 def get_all():
     try:
         results = DataDAO.getAll()
@@ -41,9 +41,9 @@ def get_all():
         abort(500)
         
 
-@app.route('/user/<int:id>', methods=['PUT'])
-def update(id):
-    foundUser = DataDAO.findByID(id)
+@app.route('/customer/<int:cid>', methods=['PUT'])
+def update(cid):
+    foundUser = DataDAO.findByID(cid)
     if not foundUser:
         abort(404)
 
@@ -51,97 +51,147 @@ def update(id):
         abort(400, 'Missing JSON in request')
 
     try:
-        DataDAO.update(id, request.json)
+        DataDAO.update(cid, request.json)
         return jsonify(request.json)
     except Exception as e:
-        print(f"Error updating user with id {id}: {e}")
+        print(f"Error updating user with id {cid}: {e}")
         abort(500)
         
-@app.route('/user/<int:id>', methods=['GET'])
-def findById(id):
+@app.route('/customer/<int:id>', methods=['GET'])
+def findById(cid):
     try:
-        foundUser = DataDAO.findByID(id)
+        foundUser = DataDAO.findByID(cid)
         if foundUser:
             return jsonify(foundUser)
         else:
             abort(404)
     except Exception as e:
-        print(f"Error finding user with id {id}: {e}")
+        print(f"Error finding user with id {cid}: {e}")
         abort(500)
         
-@app.route('/user/<int:id>', methods=['DELETE'])
-def delete(id):
+@app.route('/customer/<int:id>', methods=['DELETE'])
+def delete(cid):
     try:
-        DataDAO.delete(id)
+        DataDAO.delete(cid)
         return jsonify({"done": True})
     except Exception as e:
-        print(f"Error deleting user with the id {id}: {e}")
+        print(f"Error deleting user with the id {cid}: {e}")
         abort(500)
         
     
     
     
-##@app.route('/shop', methods =['GET'])
-##def product_list():
-    ##products = get_products()
-    ##return render_template('shop.html', products=products)
+@app.route('/shop', methods =['GET'])
+def product_list():
+    products = get_product()
+    return render_template('shop.html', products=products)
 
 
     
-##@app.route('/products', methods = ['GET'])
-##def get_all():
-   ## try:
-        ##results = ProductDAO.getAll()
-        ##return jsonify(results)
-    ##except Exception as e:
-        ##print(f"Error getting products: {e}")
-        ##abort(500)
+@app.route('/product', methods=['GET'])
+def get_product():
+    try:
+        results = ProductDAO.getAll()
+        return jsonify(results)
+    except Exception as e:
+        print(f"Error getting products: {e}")
+        abort(500)
         
-##@app.route('/products/<int:id>', methods=['PUT'])
-##def update(id):
-    ##foundProduct = ProductDAO.findByID(id)
-    ##if not foundProduct:
-        ##abort(404)
+@app.route('/product/<int:pid>', methods=['PUT'])
+def update(pid):
+    foundProduct = ProductDAO.findByID(pid)
+    if not foundProduct:
+        abort(404)
 
-    ##if not request.json:
-        ##abort(400, 'Missing JSON in request')
+    if not request.json:
+        abort(400, 'Missing JSON in request')
 
-    ##try:
-        ##ProductDAO.update(id, request.json)
-        ##return jsonify(request.json)
-    ##except Exception as e:
-        ##print(f"Error updating Product with id {id}: {e}")
-        ##abort(500)
+    try:
+        ProductDAO.update(pid, request.json)
+        return jsonify(request.json)
+    except Exception as e:
+        print(f"Error updating Product with id {pid}: {e}")
+        abort(500)
         
-##@app.route('/product/<int:id>', methods=['GET'])
-##def findById(id):
-   ## try:
-        ##foundProduct = ProductDAO.findByID(id)
-        ##if foundProduct:
-            ##return jsonify(foundProduct)
-        ###else:
-           ## abort(404)
-    ##except Exception as e:
-        ##print(f"Error finding Product with id {id}: {e}")
-        ##abort(500)
+@app.route('/product/<int:pid>', methods=['GET'])
+def findById(pid):
+   try:
+        foundProduct = ProductDAO.findByID(pid)
+        if foundProduct:
+            return jsonify(foundProduct)
+        else:
+            abort(404)
+   except Exception as e:
+       print(f"Error finding Product with id {pid}: {e}")
+       abort(500)
         
-##@app.route('/products/<int:id>', methods=['DELETE'])
-##def delete(id):
-    ##try:
-        ##ProductDAO.delete(id)
-        ##return jsonify({"done": True})
-    ##except Exception as e:
-        ##print(f"Error deleting product with the id {id}: {e}")
-        ##abort(500)
+@app.route('/product/<int:pid>', methods=['DELETE'])
+def delete(pid):
+    try:
+        ProductDAO.delete(pid)
+        return jsonify({"done": True})
+    except Exception as e:
+        print(f"Error deleting product with the id {pid}: {e}")
+        abort(500)
         
+@app.route('/band', methods =['GET'])
+def all_bands():
+    products = get_all_bands()
+    return render_template('shop.html')
 
-    
+        
+@app.route('/band/', methods=['GET'])
+def get_all_bands():
+    try:
+        results = BandDAO.getAll()
+        return jsonify(results)
+    except Exception as e:
+        print(f"Error getting bands: {e}")
+        abort(500)
+        
+@app.route('/band/<int:pid>', methods=['PUT'])
+def update(pid):
+    foundProduct = BandDAO.findByID(id)
+    if not foundProduct:
+        abort(404)
+
+    if not request.json:
+        abort(400, 'Missing JSON in request')
+
+    try:
+        BandDAO.update(id, request.json)
+        return jsonify(request.json)
+    except Exception as e:
+        print(f"Error updating Product with id {id}: {e}")
+        abort(500)
+        
+@app.route('/band/<int:id>', methods=['GET'])
+def findById(id):
+   try:
+        foundProduct = BandDAO.findByID(id)
+        if foundProduct:
+            return jsonify(foundProduct)
+        else:
+            abort(404)
+   except Exception as e:
+       print(f"Error finding Product with id {id}: {e}")
+       abort(500)
+        
+@app.route('/band/<int:id>', methods=['DELETE'])
+def delete(id):
+    try:
+        BandDAO.delete(id)
+        return jsonify({"done": True})
+    except Exception as e:
+        print(f"Error deleting product with the id {id}: {e}")
+        abort(500)
+
 
 @app.route('/order', methods = ["GET"])
 def get_order():
-    if 'username' in session:
+    if 'name' in session:
         return '<br><a href="'+'/order.html'+'">order</a>' 
-    elif not 'username' in session:
+    elif not 'name' in session:
         return redirect(url_for('login'))
     ##try:
         ##results = OrderDAO.getAll()
@@ -162,14 +212,14 @@ def get_order():
         print(f"Error finding Product with id {id}: {e}")
         abort(500)
 
-@app.route('/order/<int:id>', methods=['DELETE'])
-def deleteorder(id):
-    try:
-        OrderDAO.delete(id)
-        return jsonify({"done": True})
-    except Exception as e:
-        print(f"Error deleting order with id {id}: {e}")
-        abort(500)
+##@app.route('/order/<int:id>', methods=['DELETE'])
+##def deleteorder(id):
+    ##try:
+        ##OrderDAO.delete(id)
+        ##return jsonify({"done": True})
+    ##except Exception as e:
+        ##print(f"Error deleting order with id {id}: {e}")
+        ##abort(500)
     
     
     
@@ -198,11 +248,11 @@ def checkout():
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get("username")
+        username = request.form.get("name")
         password = request.form.get("password")
 
-        if username in users and users[username][1] == password:
-            session['username'] = username
+        if name in customer and customers[username][1] == password:
+            session['name'] = name
             return redirect(url_for('admin'))
     return render_template("/login.html")
     
