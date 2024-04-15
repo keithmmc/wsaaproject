@@ -14,22 +14,18 @@ from BandDAO import BandDAO
     
 @app.route('/')
 def index():
-    ##if 'username' in session:
+     ##'username' in session:
         ##return 'Logged in as %s' % escape(session['username']) +\
         ##'<br><a href="'+'/home.html'+'">home</a>' +\
         ##'<br><a href="'+url_for('admin')+'">Admin</a>'
         ##return '<br><a href="'+'/home.html'+'">home</a>' 
-          return app.send_static_file('home.html')
+    return app.send_static_file('home.html')
+    
       
 
 
-    
-@app.route('/admin', methods=['GET'])
-def adminOnly():
-    if 'username' in session:
-        return render_template("/admin.html")
-    elif not 'username' in session:
-        return redirect(url_for('login'))
+ 
+
     
 @app.route('/customer/', methods=['GET'])
 def get_all():
@@ -248,12 +244,12 @@ def checkout():
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get("name")
+        username = request.form.get("username")
         password = request.form.get("password")
 
-        if name in customer and customers[username][1] == password:
-            session['name'] = name
-            return redirect(url_for('admin'))
+        if username in username and username[password][1] == password:
+            session['username'] = username
+            return redirect(url_for('admin.html'))
     return render_template("/login.html")
     
     
