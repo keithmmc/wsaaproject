@@ -13,7 +13,7 @@ class DataDAO:
         host = cfg.mysql['host'],
         user = cfg.mysql['user'],
         password = cfg.mysql['pass'], 
-        database=cfg.mysql['flaskdb']
+        database=cfg.mysql['keithsshop']
      )
         return db 
    
@@ -22,10 +22,10 @@ def __init__(self):
      db.close()
      print('you are connected to the database') 
      
-def create(self, user):
+def create(self, customer):
     cursor = self.db.cursor()
-    sql = "INSERT INTO user (username, email, password, phone, eircode) VALUES (%s, %s, %s, %s, %s, %s)"
-    values = (user['username'], user['email'], user['password'], user['phone'], user['eircode'])
+    sql = "INSERT INTO customer (cid, email, username, age, password) VALUES (%s, %s, %s, %s, %s)"
+    values = (customer['cid'], customer['email'], customer['username'], customer['age'], customer['password'])
     cursor.execute(sql, values)
     self.db.commit()
     lastrowid = cursor.lastrowid
@@ -35,7 +35,7 @@ print("user has been inserted to the database")
 
 def getAll(self):
     cursor = self.db.cursor()
-    sql = "select * from user"
+    sql = "select * from customer"
     cursor.execute(sql)
     results = cursor.fetchall()
     cursor.close()
@@ -43,10 +43,10 @@ def getAll(self):
 print('running get all statement')
 
 
-def findById(self, id):
+def findById(self, cid):
     cursor = self.db.cursor()
-    sql = "SELECT * FROM user WHERE id = %s"
-    values = (id)
+    sql = "SELECT * FROM customer WHERE cid = %s"
+    values = (cid)
     cursor.execute(sql, values)
     result = cursor.fetchone()  
     cursor.close()
@@ -54,18 +54,18 @@ def findById(self, id):
 print("running statement from the database")
 
 
-def update(self, id, user):
+def update(self, cid, customer):
     cursor = self.db.cursor()
-    sql = "UPDATE user SET username = %s, email = %s, last_name = %s, password = %s, phone = %s, eircode = %s WHERE id = %s"
-    values = (user['username'], user['email'], user['password'], user['phone'], user['eircode'])
+    sql = "UPDATE customer SET username = %s, email = %s, age = %s, password = %s WHERE cid = %s"
+    values = (customer['username'], customer['email'], customer['age'], customer['password'])
     cursor.execute(sql, values)
     self.db.commit()
     cursor.close()
     
-def delete(self, id):
+def delete(self, cid):
     cursor = self.db.customer()
-    sql = "delete from customer where id = %s"
-    values = (id,)
+    sql = "delete from customer where cid = %s"
+    values = (cid,)
     cursor.execute(sql, values)
     self.db.commit()
     cursor.close()
@@ -73,7 +73,7 @@ def delete(self, id):
     
 def convertToDictionary(self, result):
         # Helper function to convert database row to a dictionary
-        colnames = ['username'],['email'],['password'],['phone'],['eircode']
+        colnames = ['cid'],['username'],['email'],['age'],['password']
         user = {colname: result[idx] for idx, colname in enumerate(colnames)}
         return user
 
