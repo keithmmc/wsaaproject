@@ -27,7 +27,7 @@ cursor.execute("CREATE TABLE band(\
 cursor.execute("CREATE TABLE customer(\
     cid int NOT NULL AUTO_INCREMENT,\
     email varchar(250),\
-    name varchar(250),\
+    username varchar(250),\
     age int,\
     password varchar(250),\
     PRIMARY KEY(cid)\
