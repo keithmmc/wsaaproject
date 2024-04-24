@@ -14,14 +14,7 @@ cursor.execute("DROP DATABASE IF EXISTS keithsstore")
 cursor.execute("CREATE DATABASE keithsstore")
 cursor.execute("USE keithsstore")
 
-# Create the cars Table
-cursor.execute("CREATE TABLE band(\
-    id int NOT NULL AUTO_INCREMENT,\
-    name varchar(250),\
-    genre varchar(250),\
-    info varchar(250),\
-    PRIMARY KEY(id)\
-    )") 
+ 
 
 # Create the Customer Table
 cursor.execute("CREATE TABLE customer(\
@@ -33,13 +26,28 @@ cursor.execute("CREATE TABLE customer(\
     PRIMARY KEY(cid)\
     )") 
 
+
 cursor.execute("CREATE TABLE product(\
-    pid int NOT NULL AUTO_INCREMENT,\
+    id int NOT NULL AUTO_INCREMENT,\
     amount int,\
     name varchar(250),\
     price int,\
     info varchar(250),\
-    PRIMARY KEY(pid)\
+    PRIMARY KEY(id)\
+    )") 
+
+cursor.execute("CREATE TABLE orders(\
+    id int NOT NULL AUTO_INCREMENT,\
+    email varchar(250),\
+    amount int,\
+    eircode varchar(10),\
+    PRIMARY KEY(id)\
+    )") 
+
+cursor.execute("CREATE TABLE contact(\
+    fname varchar(250),\
+    lname varchar(250),\
+    email varchar(250)\
     )") 
 
 
