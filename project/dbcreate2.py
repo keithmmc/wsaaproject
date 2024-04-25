@@ -44,6 +44,13 @@ cursor.execute("CREATE TABLE orders(\
     PRIMARY KEY(id)\
     )") 
 
+cursor.execute("CREATE TABLE admin(\
+   id int NOT NULL AUTO_INCREMENT,\
+    email varchar(250),\
+    password varchar(20),\
+    primary key(id)\
+    )")
+
 cursor.execute("CREATE TABLE contact(\
     fname varchar(250),\
     lname varchar(250),\
