@@ -1,290 +1,191 @@
-import os
-from flask import Flask, url_for, request, redirect, abort, session, render_template, jsonify
-from markupsafe import escape
-import stripe 
-from DataDAO import DataDAO
-from ProductDAO import ProductDAO
-from OrderDao import OrderDao
-from AdminDao import AdminDao
-
-app = Flask(__name__, static_url_path='', static_folder='static')
-app.config['STRIPE_PUBLIC_KEY'] = 'pk_test_51LbowdF35qyiz7dHw0XaoOZmq8UHUmdBRYN1BGuQjSwfvoXH42Lx2Vm6c7x28VHik0Kd8KzAdmnBXbzwsEDTCsq500PRbcO9QB'
-app.config['STRIPE_SECRET_KEY'] = 'sk_test_51LbowdF35qyiz7dHoPZ46KJW0xEwnmWR7oBwSZQ3sTe8xHx69ane3dG1FwrFLbyATOwtJRLtXisC6RwwDm0v19QD00ZgY8zh0u'
-stripe.api_key = 'sk_test_51LbowdF35qyiz7dHoPZ46KJW0xEwnmWR7oBwSZQ3sTe8xHx69ane3dG1FwrFLbyATOwtJRLtXisC6RwwDm0v19QD00ZgY8zh0u'
+from flask import Flask, url_for, request, redirect, abort, jsonify,render_template, flash, session
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+import mysql.connector
+import json
+from shop_dao import shop_dao
 
 
-@app.route('/')
-def index():
-     ##'username' in session:
-        ##return 'Logged in as %s' % escape(session['username']) +\
-        ##'<br><a href="'+'/home.html'+'">home</a>' +\
-        ##'<br><a href="'+url_for('admin')+'">Admin</a>'
-        ##return '<br><a href="'+'/home.html'+'">home</a>' 
-    return app.send_static_file('home.html')
-    
+app = Flask(__name__, static_url_path='', static_folder='static', template_folder='templates')
 
-    
-@app.route('/customer/', methods=['GET'])
-def get_all():
-    try:
-        results = DataDAO.getAll()
-        return jsonify(results)
-    except Exception as e:
-        print(f"Error getting products: {e}")
-        abort(500)
-        
 
-@app.route('/customer/<int:cid>', methods=['PUT'])
-def update(cid):
-    foundUser = DataDAO.findByID(cid)
-    if not foundUser:
-        abort(404)
+
+@app.route('/shirts', methods=['GET'])
+def getAll():
+    mycursor, connection = shop_dao.get_cursor()
+    mycursor.execute('SELECT * FROM productdata')
+    shirts = mycursor.fetchall()
+    shop_dao.close_all(mycursor, connection)
+
+    # Create a list of dictionaries for each shoe
+    shirt_list = [{'id': shirt[0], 'Product': shirt[1], 'Model': shirt[2], 'Price': shirt[3]} for shirt in shirts]
+    return jsonify({'shirts': shirt_list})
+
+# Find by Id
+@app.route('/shirts/<int:id>')
+def findById(id):
+    mycursor, connection = shop_dao.get_cursor()
+    mycursor.execute(f'SELECT * FROM productdata WHERE id = {id}')
+    shirt = mycursor.fetchone()
+    shop_dao.close_all(mycursor, connection)
+    if not shirt:
+        return jsonify({}), 204
+    return jsonify({'shirt': {'id': shirt[0], 'Product': shirt[1], 'Model': shirt[2], 'Price': shirt[3]}})
+
+# Create
+# curl -X POST -H "Content-Type: application/json" -d "{\"Product\": \"New Product\", \"Model\": \"New Model\", \"Price\": 123}" http://127.0.0.1:5000/shoes
+@app.route('/shirts', methods=['POST'])
+def create():
+    mycursor, connection = shop_dao.get_cursor()
 
     if not request.json:
-       abort(400, 'Missing JSON in request')
+        abort(400)
 
-    try:
-        DataDAO.update(cid, request.json)
-        return jsonify(request.json)
-    except Exception as e:
-        print(f"Error updating user with id {cid}: {e}")
-        abort(500)
-        
-@app.route('/customer/<int:id>', methods=['GET'])
-def findById(cid):
-    try:
-        foundUser = DataDAO.findByID(cid)
-        if foundUser:
-            return jsonify(foundUser)
-        else:
-            abort(404)
-    except Exception as e:
-        print(f"Error finding user with id {cid}: {e}")
-        abort(500)
-        
-@app.route('/customer/<int:id>', methods=['DELETE'])
-def delete(cid):
-    try:
-        DataDAO.delete(cid)
-        return jsonify({"done": True})
-    except Exception as e:
-        print(f"Error deleting user with the id {cid}: {e}")
-        abort(500)
-        
-@app.route('/admin',methods=['GET'])
-def adminOnly():
-    if 'email' in session:
-        return render_template("/admin.html")
-    elif not 'email' in session:
-        return redirect(url_for('login'))
-    
-@app.route('/admin/<int:id>', methods=['DELETE'])
-def delete_admin(id):
-    try:
-        # Call the delete method from the productDAO to delete the product
-        AdminDao.delete(id)
-        return jsonify({"message": f"Admin with ID {id} deleted successfully"})
-    except Exception as e:
-        # Handle any exceptions that may occur during deletion
-        return jsonify({"error": f"Error deleting admin with ID {id}: {str(e)}"}), 500
-
-        
-@app.route('/product')
-def getAll():
-    results = ProductDAO.getAll()
-    return jsonify(results)
-
-
-
-@app.route('/product', methods=['GET', 'POST'])
-def product():
-    if request.method == 'GET':
-        results = ProductDAO.getAll()
-        return jsonify(results)
-    elif request.method == 'POST':
-        data = request.get_json()
-        new_product_id = ProductDAO.create((product['amount'], product['name'], product['price'], product['info']))
-        return jsonify({"id": new_product_id}), 201
-    
-#endpoint to retrieve products by ID
-##@app.route('/product/<int:id>')
-##def findById(id):
-    ##foundProduct = ProductDAO.findByID(id)
-    ##return jsonify(foundProduct)
-
-         #Endpoint to delete a product by ID
-@app.route('/product/<int:id>', methods=['DELETE'])
-def delete_product(id):
-    try:
-        # Call the delete method from the productDAO to delete the product
-        ProductDAO.delete(id)
-        return jsonify({"message": f"Product with ID {id} deleted successfully"})
-    except Exception as e:
-        # Handle any exceptions that may occur during deletion
-        return jsonify({"error": f"Error deleting product with ID {id}: {str(e)}"}), 500
-        
-        # Endpoint to update a product by ID
-@app.route('/product/<int:id>', methods=['PUT'])
-def update_product(id):
-    try:
-        # Get the JSON data from the request
-        data = request.get_json()
-
-        # Call the update method from the productDAO to update the product
-        ProductDAO.update((product['amount'], product['name'], product['price'], product['info'], id))
-        
-        return jsonify({"message": f"Product with ID {id} updated successfully"})
-    except Exception as e:
-        # Handle any exceptions that may occur during the update
-        return jsonify({"error": f"Error updating product with ID {id}: {str(e)}"}), 500
-    
-
-@app.route('/orders', methods = ["GET"])
-def get_order():
-    if 'name' in session:
-        return '<br><a href="'+'/order.html'+'">order</a>' 
-    elif not 'name' in session:
-        return redirect(url_for('login'))
-    try:
-        results = OrderDao.getAll()
-        return jsonify(results)
-    
-    except Exception as e:
-        print(f"Error getting your orders: {e}")
-        abort(500)
-        
-
-
-@app.route('/orders/<int:id>', methods=['DELETE'])
-def delete_order(id):
-    try:
-        OrderDao.delete(id)
-        return jsonify({"done": True})
-    except Exception as e:
-        print(f"Error deleting order with id {id}: {e}")
-        abort(500)
-        
-@app.route('/orders/<int:id>', methods=['PUT'])
-def update_order(id):
-    try:
-        # Get the JSON data from the request
-        data = request.get_json()
-
-        # Call the update method from the productDAO to update the product
-        OrderDao.update((update_order['email'], update_order['amount'], update_order['eircode'], id))
-        
-        return jsonify({"message": f"Product with ID {id} updated successfully"})
-    except Exception as e:
-        # Handle any exceptions that may occur during the update
-        return jsonify({"error": f"Error updating product with ID {id}: {str(e)}"}), 500
-    
-    
-    
-@app.route('/contact')
-def contact():
-     return app.send_static_file('contact.html')
-
- 
-@app.route('/login', methods = ['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form.get("username")
-        password = request.form.get("password")
-
-        if username in username and username[password][1] == password:
-            session['username'] = username
-            return redirect(url_for('admin.html'))
-    return render_template("/login.html")
-    
-    
-    
-@app.route('/logout')
-def logout():
-    session.clear()
-    return "you have not logged out"
-    return redirect('/home.html')  
-
-@app.route('/clear')
-def clear():
-    #session.clear()
-    session.pop('counter',None)   
-
-    return "done" 
-   
-
-@app.route('/buy')
-def buy():
-    '''
-    session = stripe.checkout.Session.create(
-        payment_method_types=['card'],
-        line_items=[{
-            'price': 'price_1GtKWtIdX0gthvYPm4fJgrOr',
-            'quantity': 1,
-        }],
-        mode='payment',
-        success_url=url_for('thanks', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
-        cancel_url=url_for('index', _external=True),
-    )
-    '''
-    return render_template(
-        'index.html', 
-        #checkout_session_id=session['id'], 
-        #checkout_public_key=app.config['STRIPE_PUBLIC_KEY']
-    )
-
-@app.route('/stripe_pay')
-def stripe_pay():
-    session = stripe.checkout.Session.create(
-        payment_method_types=['card'],
-        line_items=[{
-            'price': 'YOUR_PRODUCT_PRICE_ID',
-            'quantity': 1,
-        }],
-        mode='payment',
-        success_url=url_for('thanks', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
-        cancel_url=url_for('index', _external=True),
-    )
-    return {
-        'checkout_session_id': session['id'], 
-        'checkout_public_key': app.config['STRIPE_PUBLIC_KEY']
+    new_shirt = {
+        'Product': request.json['Product'],
+        'Model': request.json['Model'],
+        'Price': request.json['Price']
     }
 
-@app.route('/thanks')
-def thanks():
-    return render_template('thanks.html')
+    sql = 'INSERT INTO productdata (Product, Model, Price) VALUES (%s, %s, %s)'
+    values = (new_shirt['Product'], new_shirt['Model'], new_shirt['Price'])
 
-@app.route('/stripe_webhook', methods=['POST'])
-def stripe_webhook():
-    print('WEBHOOK CALLED')
+    mycursor.execute(sql, values)
+    connection.commit()
 
-    if request.content_length > 1024 * 1024:
-        print('REQUEST TOO BIG')
-        abort(400)
-    payload = request.get_data()
-    sig_header = request.environ.get('HTTP_STRIPE_SIGNATURE')
-    endpoint_secret = 'YOUR_ENDPOINT_SECRET'
-    event = None
+    new_shirt['id'] = mycursor.lastrowid
+    shop_dao.close_all(mycursor, connection)
+    return jsonify({'shirt': new_shirt}), 201
 
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, endpoint_secret
-        )
-    except ValueError as e:
-        # Invalid payload
-        print('INVALID PAYLOAD')
-        return {}, 400
-    except stripe.error.SignatureVerificationError as e:
-        # Invalid signature
-        print('INVALID SIGNATURE')
-        return {}, 400
+# Update
+# curl -X PUT -H "Content-Type: application/json" -d "{\"Product\": \"Updated Product\", \"Model\": \"Updated Model\", \"Price\": 200}" http://127.0.0.1:5000/shoes/6
+@app.route('/shirts/<int:id>', methods=['PUT'])
+def update(id):
+    mycursor, connection = shop_dao.get_cursor()
 
-    # Handle the checkout.session.completed event
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        print(session)
-        line_items = stripe.checkout.Session.list_line_items(session['id'], limit=1)
-        print(line_items['data'][0]['description'])
+    # Check if the product with the given ID exists
+    mycursor.execute(f'SELECT * FROM productdata WHERE id = {id}')
+    current_shirt = list(mycursor.fetchone())
 
-    return {}
+    if not current_shirt:
+        return jsonify({}), 404
+
+    if 'Product' in request.json:
+        current_shirt[1] = request.json['Product']
+    if 'Model' in request.json:
+        current_shirt[2] = request.json['Model']
+    if 'Price' in request.json:
+        current_shirt[3] = request.json['Price']
+
+    sql = 'UPDATE productdata SET Product=%s, Model=%s, Price=%s WHERE id=%s'
+    values = (current_shirt[1], current_shirt[2], current_shirt[3], id)
+
+    mycursor.execute(sql, values)
+    connection.commit()
+
+    shop_dao.close_all(mycursor, connection)
+    return jsonify({'shirt': {'id': current_shirt[0], 'Product': current_shirt[1], 'Model': current_shirt[2], 'Price': current_shirt[3]}})
+
+# Delete
+# curl -X DELETE http://127.0.0.1:5000/shoes/7
+@app.route('/shirts/<int:id>', methods=['DELETE'])
+def delete(id):
+    mycursor, connection = shop_dao.get_cursor()
+    mycursor.execute(f'SELECT * FROM productdata WHERE id = {id}')
+    deleted_shirt = mycursor.fetchone()
+
+    if not deleted_shirt:
+        return jsonify({}), 404
+
+    sql = 'DELETE FROM productdata WHERE id=%s'
+    values = (id,)
+    mycursor.execute(sql, values)
+    connection.commit()
+    
+    shop_dao.close_all(mycursor, connection)
+    return jsonify({"done":True})
+
+# New route for creating an order
+@app.route('/orders', methods=['POST'])
+@login_required
+def create_order():
+    data = request.json
+
+    # Retrieve order details
+    product_id = data.get('productId')
+    product_name = data.get('productName')
+    quantity = data.get('quantity')
+    total_price = data.get('totalPrice')
+
+    # Add order to the orderdata database
+    order_data = shop_dao.create_order(product_id, quantity, total_price)
+
+    return jsonify({'order': order_data}), 201
+
+def get_products():
+    mycursor, connection = shop_dao.get_cursor()
+    mycursor.execute('SELECT * FROM productdata')
+    products = mycursor.fetchall()
+    shop_dao.close_all(mycursor, connection)
+
+    # Create a list of dictionaries for each product
+    products_list = [{'id': product[0], 'Product': product[1], 'Model': product[2], 'Price': product[3]} for product in products]
+    return products_list
+
+app.config['SECRET_KEY'] = 'your_secret_key'
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+
+class User(UserMixin):
+    def __init__(self, user_id):
+        self.id = user_id
+
+# Hard-coded user for demonstration purposes
+users = {'1': {'username': 'admin', 'password': 'pass'}}
+
+@app.route('/')
+def home():
+    if not session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        return "Hello!  <a href='/logout'>Logout</a>"
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User(user_id)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = users.get('1')  # Hard-coded user for demonstration purposes
+
+        if user and user['password'] == password:
+            user_obj = User('1')
+            login_user(user_obj)
+            flash('Login successful!', 'success')
+            return redirect(url_for('product_list'))
+        else:
+            flash('Invalid username or password', 'error')
+
+    return render_template('login.html')
+
+
+    
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+# Route to render the product list page
+@app.route('/shop')
+def product_list():
+    products = get_products()
+    return render_template('shop.html', products=products)
+
+
 if __name__ == '__main__':
     app.run(debug=True)
+
