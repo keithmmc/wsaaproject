@@ -54,16 +54,6 @@ sql= '''
 '''
 mycursor.execute(sql)
 
-sql= '''
-    CREATE TABLE IF NOT EXISTS customerdata (
-        ID INT AUTO_INCREMENT PRIMARY KEY,
-        Name VARCHAR(300),
-        Email VARCHAR(200),
-        Eircode VARCHAR(12)
-    )
-'''
-mycursor.execute(sql)
-
 # Second database table 'orderdata'
 order_sql = '''
     CREATE TABLE IF NOT EXISTS orderdata (
@@ -74,22 +64,6 @@ order_sql = '''
         FOREIGN KEY (ProductID) REFERENCES productdata(ID)
     )
 '''
-
-def create_member(self, id, email):
-        mycursor, connection = self.get_cursor()
-
-        # Insert a new order into the 'orderdata' table
-        order_sql = '''
-            INSERT INTO memberdata (ID, email) 
-            VALUES (%s, %s)
-        '''
-        values = (id, email)
-
-        mycursor.execute(order_sql, values)
-        connection.commit()
-
-        # Close the cursor and connection
-        self.close_all(mycursor, connection)
 # Execute the SQL statement
 mycursor.execute(order_sql)
 connection.commit()
