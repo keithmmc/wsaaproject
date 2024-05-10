@@ -12,62 +12,6 @@ html {
       font-size: 16px;
       min-width: 600px;
   }
-  
-  header
-  {
-      margin-left: auto;
-      margin-right: auto;
-      text-align: center;
-      padding: 0;
-  }
-  
- 
-  
-  /* ### ### ### */
-  
-  /* links */
-  a:link {
-          color:#fd7;
-  }
-  
-  /* visited link */
-  a:visited {
-          color:#fd7;
-  }
-  
-  /* mouse over link */
-  a:hover {
-          color: #9df;
-  }
-  
-  /* selected link */
-  a:active {
-          color: #eee;
-  }
-  
-  /* ### ### ### */
-  
-  /* Navigation Bar */
-  #topnav
-  {
-      background-color: #05a;
-      text-align: center;
-      clear: both;
-  }
-  
-  /* Each element of the menu (class) */
-  .menu
-  {
-      list-style-type: none;
-      width: 100%;
-      margin: 0;
-      padding: 5px;
-      font-size: 18px;
-      min-height: 38px;
-      line-height: 120%;
-  }
-  
-  
   .menu a
   {
       color: #fd7;
@@ -82,40 +26,25 @@ html {
       background-color: #049;
       color: #fd7;
   }
-  
-  
-  .picture
-  {
-      margin-left: auto;
-      margin-right: auto;
-      text-align: center;
-      width: 370px;
-  }
-  
-  .caption
-  {
-      color:#bbd;
-      font-size: 10px;
-      font-weight: 100;
-      letter-spacing: 0px;
-      margin-bottom: 8px;
-      float: left;
-  }
-  
-  .caption a:hover
-  {
-      color: #bbd;	
-      text-decoration: none;
-  }
-  
-  .caption a:visited
-  {
-      text-decoration: none;
-  }
-  
-  
-  /* ### ### ### */
-  
+
+  a:link {
+    color:#fd7;
+}
+
+/* visited link */
+a:visited {
+    color:#fd7;
+}
+
+/* mouse over link */
+a:hover {
+    color: #9df;
+}
+
+/* selected link */
+a:active {
+    color: #eee;
+}
   h1
   {
       font-size: 28px;
@@ -133,26 +62,8 @@ html {
       color: #fd7;
   }
   
-  
-  /* This class container holds the main section of the main webpage - only one per page*/
-  .mainsection
-  {
-      color: #eee;
-  }
+
   
   
-  /* Collection of the main website content elements */
-  .core
-  {
-      background-color: #234;
-      margin-left: auto;
-      margin-right: auto;
-      text-align: center;
-      width: 950px;
-      /*max-width: 950px;*/
-      margin-top: 15px;
-      margin-bottom: 15px;
-      display: table;
-      clear: both;
-  }
+
   
