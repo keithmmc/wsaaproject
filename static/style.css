@@ -4,13 +4,14 @@ html {
   
   body
   {
-      margin: 0 !important;
-      padding: 0px 0px;
-      background-color: #184A96;
-      color: #eee;
-      font-family: 'Open Sans', sans-serif;
-      font-size: 16px;
-      min-width: 600px;
+    margin: 20px;
+    font-size: 16px;
+    min-width: 600px;
+    padding: 0px 0px;
+    background-color: #184A96;
+    color: #eee;
+    font-family: 'Open Sans', sans-serif;
+      
   }
   .menu a
   {
@@ -62,6 +63,18 @@ a:active {
       color: #fd7;
   }
   
+  form {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input, button {
+    margin-bottom: 10px;
+}
 
   
   
