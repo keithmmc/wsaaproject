@@ -1,0 +1,8 @@
+{
+    "Database": {
+        "host": "keithmc21.mysql.pythonanywhere-services.com",
+        "user": "keithmc21",
+        "password": "ASUSVivoBook",
+        "database": "keithmc21$default"
+    }
+}
