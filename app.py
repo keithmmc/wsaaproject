@@ -32,7 +32,7 @@ def findById(id):
     return jsonify({'shirt': {'id': shirt[0], 'Product': shirt[1], 'Model': shirt[2], 'Price': shirt[3]}})
 
 # Create
-# curl -X POST -H "Content-Type: application/json" -d "{\"Product\": \"New Product\", \"Model\": \"New Model\", \"Price\": 123}" http://127.0.0.1:5000/shoes
+# curl -X POST -H "Content-Type: application/json" -d "{\"Product\": \"New Product\", \"Model\": \"New Model\", \"Price\": 123}" http://127.0.0.1:5000/shirt
 @app.route('/shirts', methods=['POST'])
 def create():
     mycursor, connection = shop_dao.get_cursor()
@@ -57,7 +57,7 @@ def create():
     return jsonify({'shirt': new_shirt}), 201
 
 # Update
-# curl -X PUT -H "Content-Type: application/json" -d "{\"Product\": \"Updated Product\", \"Model\": \"Updated Model\", \"Price\": 200}" http://127.0.0.1:5000/shoes/6
+# curl -X PUT -H "Content-Type: application/json" -d "{\"Product\": \"Updated Product\", \"Model\": \"Updated Model\", \"Price\": 200}" http://127.0.0.1:5000/shirt/6
 @app.route('/shirts/<int:id>', methods=['PUT'])
 def update(id):
     mycursor, connection = shop_dao.get_cursor()
@@ -86,7 +86,7 @@ def update(id):
     return jsonify({'shirt': {'id': current_shirt[0], 'Product': current_shirt[1], 'Model': current_shirt[2], 'Price': current_shirt[3]}})
 
 # Delete
-# curl -X DELETE http://127.0.0.1:5000/shoes/7
+# curl -X DELETE http://127.0.0.1:5000/shirt/7
 @app.route('/shirts/<int:id>', methods=['DELETE'])
 def delete(id):
     mycursor, connection = shop_dao.get_cursor()
