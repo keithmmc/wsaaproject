@@ -20,6 +20,7 @@ Language:
 * Flask 3.0.0
 * HTML
 * CSS
+* javascript
 * Compiler:
 * Anaconda 23.10.0
 * Other Information:
